@@ -1,0 +1,222 @@
+# Audio flags intended for general consumption (cross-cutting), but NOT included in framework.
+#
+# Please add flags in alphabetical order.
+
+package: "com.android.media.audio"
+container: "system"
+
+# go/keep-sorted start block=yes newline_separated=yes by_regex=name:\s*"([^"]+)"
+flag {
+    name: "abs_volume_stream_always_max"
+    namespace: "media_audio"
+    description: "The stream that drives the absolute volume should always have the highest index"
+    bug: "439668753"
+}
+
+flag {
+    name: "alarm_min_volume_zero"
+    namespace: "media_audio"
+    description: "Support configuring alarm min vol to zero"
+    bug: "296884402"
+}
+
+flag {
+    name: "audio_service_routing_cache_shared_memory"
+    namespace: "media_audio"
+    description: "Use shared memory routing cache between audioserver and AudioService"
+    bug: "487025671"
+}
+
+flag {
+    name: "audio_stream_bt_sco_cleanup"
+    namespace: "media_audio"
+    description: "Remove any usages of AUDIO_STREAM_BLUETOOTH_SCO from the audioserver."
+    bug: "441152611"
+}
+
+flag {
+    name: "ble_hearing_aid_device_impl"
+    namespace: "media_audio"
+    description: "Use new BLE_HEARING_AID device type"
+    bug: "370812132"
+}
+
+flag {
+    name: "camera_shutter_sound"
+    namespace: "media_audio"
+    description: "Manage camera sound depending on locale and sim"
+    bug: "440483480"
+}
+
+flag {
+    name: "check_route_in_get_audio_mix_port"
+    namespace: "media_audio"
+    description: "Checks routing in the API getAudioMixPort to respect"
+                 "connectivity between mix ports and device ports as"
+                 "indicated by getAudioRoutes."
+    bug: "367117623"
+}
+
+flag {
+    name: "defer_wear_permission_updates"
+    namespace: "media_audio"
+    description:
+        "defer permission updates to reduce pressure"
+        "on app launch latency on lower core devices."
+    bug: "380347376"
+}
+
+flag {
+    name: "disable_prescale_absolute_volume"
+    namespace: "media_audio"
+    description:
+        "Disable pre-scale absolute volume."
+    bug: "302553525"
+}
+
+flag {
+    name: "equal_sco_ha_vc_index_range"
+    namespace: "media_audio"
+    description:
+        "Introduce the same index range for voice calls over SCO and "
+        "hearing aids"
+    bug: "416418971"
+}
+
+flag {
+    name: "equal_sco_lea_vc_index_range"
+    namespace: "media_audio"
+    description:
+        "Introduce the same index range for voice calls over SCO and "
+        "LE audio"
+    bug: "364364777"
+}
+
+flag {
+    name: "filter_call_on_listener_hint"
+    namespace: "media_audio"
+    description: "Filter call on listener hint"
+    bug: "413631827"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "hardening_bfgs"
+    namespace: "media_audio"
+    description: "Flag for bfgs capability constraint"
+    bug: "475914478"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "hardening_partial"
+    is_exported: true
+    namespace: "media_audio"
+    description: "Flag for partial enforcement of hardening"
+    bug: "376480814"
+}
+
+flag {
+    name: "hardening_partial_volume"
+    namespace: "media_audio"
+    description: "Flag for partial enforcement of volume hardening"
+    bug: "376480814"
+}
+
+flag {
+    name: "hardening_strict"
+    is_exported: true
+    namespace: "media_audio"
+    description: "Flag for strict enforcement (deny access) of hardening"
+    bug: "376480814"
+}
+
+flag {
+    name: "hardening_usage"
+    namespace: "media_audio"
+    description: "Flag for usage validation"
+    bug: "451793120"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "optimize_bt_device_switch"
+    namespace: "media_audio"
+    description: "Optimize the Bluetooth active device switch sequence"
+    bug: "373867402"
+}
+
+flag {
+    name: "persist_mode_assistant_volume_cache"
+    namespace: "media_audio"
+    description: "Persist the cached STREAM_ASSISTANT volume during MODE_ASSISTANT_CONVERSATION"
+    bug: "490036136"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "ring_my_car"
+    namespace: "media_audio"
+    description:
+        "Incoming ringtones will not be muted based on ringer mode when connected to a car"
+    bug: "319515324"
+}
+
+flag {
+    name: "ringer_mode_affects_alarm"
+    namespace: "media_audio"
+    description:
+        "Support a configuration where ringer mode affects alarm stream"
+    bug: "312456558"
+}
+
+flag {
+    name: "spatializer_upmix"
+    namespace: "media_audio"
+    description: "Enable spatializer upmix"
+    bug: "323985367"
+}
+
+flag {
+    name: "standard_volume_range_apm"
+    namespace: "media_audio"
+    description: "APM uses a standard volume range of 0/1 - 100."
+    bug: "439681541"
+}
+
+flag {
+    name: "stereo_spatialization"
+    namespace: "media_audio"
+    description: "Enable stereo channel mask for spatialization."
+    bug: "303920722"
+}
+
+flag {
+    name: "stereo_spatialization_binaural_transaural"
+    namespace: "media_audio"
+    description: "Allows selective stereo spatialization enablement for binaural or transaural"
+    bug: "417494541"
+}
+
+flag {
+    name: "stream_assistant_not_aliased_to_music"
+    namespace: "media_audio"
+    description: "By default STREAM_ASSISTANT is not aliased to STREAM_MUSIC"
+    bug: "442485761"
+}
+
+flag {
+    name: "volume_refactoring"
+    namespace: "media_audio"
+    description: "Refactor the audio volume internal architecture logic"
+    bug: "324152869"
+}
+# go/keep-sorted end

@@ -1,0 +1,17 @@
+# MIDI flags
+# Only add flags here which must be included in framework.jar
+#
+# Please add flags in alphabetical order.
+
+package: "android.media.midi"
+container: "system"
+
+# go/keep-sorted start block=yes newline_separated=yes by_regex=name:\s*"([^"]+)"
+flag {
+    name: "virtual_ump"
+    is_exported: true
+    namespace: "media_audio"
+    description: "Enable virtual UMP MIDI."
+    bug: "291115176"
+}
+# go/keep-sorted end

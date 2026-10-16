@@ -1,0 +1,162 @@
+/*
+ * Copyright (C) 2022 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#define LOG_TAG "CameraServiceWatchdog"
+
+#include <perfetto/tracing.h>
+
+#include "CameraServiceWatchdog.h"
+#include "com_android_internal_camera_flags.h"
+#include "android/set_abort_message.h"
+#include "utils/CameraServiceProxyWrapper.h"
+#include <statslog_framework.h>
+
+namespace android {
+
+namespace flags = com::android::internal::camera::flags;
+Mutex CameraServiceWatchdog::mLastPerfettoTriggerLock;
+time_t CameraServiceWatchdog::mLastPerfettoTriggerMs = 0;
+
+bool CameraServiceWatchdog::threadLoop()
+{
+    {
+        AutoMutex _l(mWatchdogLock);
+
+        while (mPause) {
+            mWatchdogCondition.wait(mWatchdogLock);
+        }
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(mCycleLengthMs));
+
+    {
+        AutoMutex _l(mWatchdogLock);
+
+        for (auto it = mTidMap.begin(); it != mTidMap.end(); it++) {
+            uint32_t currentThreadId = it->first;
+
+            mTidMap[currentThreadId].cycles++;
+
+            // If we are at 3/4 of reaching timeout, trigger a stack trace dump
+            // for all relevant processes by CameraServiceProxy.
+            if (mTidMap[currentThreadId].cycles == mMaxCycles * 3 / 4) {
+                ALOGW("CameraServiceWatchdog pre-watchdog for pid: %d tid: %d, clientPid %d",
+                        getpid(), currentThreadId, mClientPid);
+                mCameraServiceProxyWrapper->notifyWatchdog(mClientPid, mIsNativePid);
+            } else if (mTidMap[currentThreadId].cycles >= mMaxCycles) {
+                // Activate a remote Perfetto trace
+                time_t now = time(nullptr);
+                int64_t since_last_trigger = getPerfettoTriggerElapsedTimeMs(now);
+                if (since_last_trigger >= kSecondsToTriggerAgain) {
+                    if (perfetto::Tracing::IsInitialized()) {
+                        std::vector<std::string> labels{
+                            "android.cameraservice.watchdog-time-out"};
+                        perfetto::Tracing::ActivateTriggers(labels, /*ttl_ms=*/0);
+                        setPerfettoTriggerTimeMs(now);
+                    }
+                }
+                std::string abortMessage = getAbortMessage(mTidMap[currentThreadId].functionName);
+                android_set_abort_message(abortMessage.c_str());
+                ALOGW("CameraServiceWatchdog triggering abort for pid: %d tid: %d", getpid(),
+                        currentThreadId);
+                mCameraServiceProxyWrapper->logClose(mCameraId, 0 /*latencyMs*/,
+                        true /*deviceError*/,
+                        android::framework::stats
+                            ::CAMERA_ACTION_EVENT__ERROR_STATE__CAMERA_WATCHDOG_ERROR);
+                // We use abort here so we can get a tombstone for better
+                // debugging.
+                for (pid_t pid : mProviderPids) {
+                    kill(pid, SIGABRT);
+                }
+
+                abort();
+            }
+        }
+    }
+
+    return true;
+}
+
+std::string CameraServiceWatchdog::getAbortMessage(const std::string& functionName) {
+    std::string res = "CameraServiceWatchdog triggering abort during "
+            + functionName;
+    return res;
+}
+
+void CameraServiceWatchdog::requestExit()
+{
+    Thread::requestExit();
+
+    AutoMutex _l(mWatchdogLock);
+
+    mTidMap.clear();
+
+    if (mPause) {
+        mPause = false;
+        mWatchdogCondition.signal();
+    }
+}
+
+void CameraServiceWatchdog::setEnabled(bool enable)
+{
+    AutoMutex _l(mEnabledLock);
+
+    if (enable) {
+        mEnabled = true;
+    } else {
+        mEnabled = false;
+    }
+}
+
+void CameraServiceWatchdog::stop(uint32_t tid)
+{
+    AutoMutex _l(mWatchdogLock);
+
+    mTidMap.erase(tid);
+
+    if (mTidMap.empty()) {
+        mPause = true;
+    }
+}
+
+void CameraServiceWatchdog::start(uint32_t tid, const char* functionName)
+{
+    AutoMutex _l(mWatchdogLock);
+
+    MonitoredFunction monitoredFunction = {};
+    monitoredFunction.cycles = 0;
+    monitoredFunction.functionName = functionName;
+    mTidMap[tid] = monitoredFunction;
+
+    if (mPause) {
+        mPause = false;
+        mWatchdogCondition.signal();
+    }
+}
+
+int64_t CameraServiceWatchdog::getPerfettoTriggerElapsedTimeMs(time_t now) {
+    AutoMutex _l(mLastPerfettoTriggerLock);
+    int64_t since_last_trigger =
+        static_cast<int64_t>(difftime(now, mLastPerfettoTriggerMs));
+    return since_last_trigger;
+}
+
+void CameraServiceWatchdog::setPerfettoTriggerTimeMs(time_t now) {
+    AutoMutex _l(mLastPerfettoTriggerLock);
+    mLastPerfettoTriggerMs = now;
+}
+
+}   // namespace android

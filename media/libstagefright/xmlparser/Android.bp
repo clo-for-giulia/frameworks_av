@@ -1,0 +1,68 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_av_media_libstagefright_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_av_media_libstagefright_license"],
+}
+
+cc_library_headers {
+    name: "libstagefright_xmlparser_headers",
+    export_include_dirs: ["include"],
+    vendor_available: true,
+}
+
+cc_library_shared {
+    name: "libstagefright_xmlparser",
+    vendor_available: true,
+    double_loadable: true,
+
+    srcs: [
+        "MediaCodecsXmlParser.cpp",
+    ],
+
+    export_include_dirs: [
+        "include",
+    ],
+
+    shared_libs: [
+        "libbase",
+        "libexpat",
+        "libgui",
+        "liblog",
+        "libstagefright_omx_utils",
+// QTI_BEGIN: 2018-06-05: Video: media: Add changes to pick target specific media xml's
+        "libcutils"
+// QTI_END: 2018-06-05: Video: media: Add changes to pick target specific media xml's
+    ],
+
+// QTI_BEGIN: 2018-06-05: Video: media: Add changes to pick target specific media xml's
+    target: {
+        vendor: {
+            cflags: ["-D__ANDROID_VNDK__"],
+        },
+    },
+
+// QTI_END: 2018-06-05: Video: media: Add changes to pick target specific media xml's
+    cflags: [
+        "-Werror",
+        "-Wall",
+    ],
+
+    sanitize: {
+        misc_undefined: [
+            "unsigned-integer-overflow",
+            "signed-integer-overflow",
+        ],
+        cfi: true,
+    },
+
+}
+
+xsd_config {
+    name: "media_codecs",
+    srcs: ["media_codecs.xsd"],
+    package_name: "media.codecs",
+    root_elements: ["MediaCodecs"],
+}

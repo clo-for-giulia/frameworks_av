@@ -1,0 +1,18 @@
+# Flags for libaudioclient, and other native client libraries.
+#
+# Please add flags in alphabetical order.
+
+package: "com.android.media.audioclient"
+container: "system"
+
+# go/keep-sorted start block=yes newline_separated=yes by_regex=name:\s*"([^"]+)"
+flag {
+    name: "audiosystem_service_acquisition"
+    namespace: "media_audio"
+    description: "Clean up audiosystem service acquisition."
+    bug: "330358287"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+# go/keep-sorted end

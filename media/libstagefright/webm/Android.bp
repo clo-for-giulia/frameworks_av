@@ -1,0 +1,88 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_av_media_libstagefright_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_av_media_libstagefright_license"],
+}
+
+cc_library_static {
+    name: "libstagefright_webm",
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+
+    sanitize: {
+        misc_undefined: [
+            "signed-integer-overflow",
+            "unsigned-integer-overflow",
+        ],
+        cfi: true,
+    },
+
+    srcs: [
+        "EbmlUtil.cpp",
+        "WebmElement.cpp",
+        "WebmFrame.cpp",
+        "WebmFrameThread.cpp",
+        "WebmWriter.cpp",
+    ],
+
+// QTI_BEGIN: 2018-02-19: Audio: frameworks/av: enable audio extended features
+    include_dirs: [
+// QTI_END: 2018-02-19: Audio: frameworks/av: enable audio extended features
+        "frameworks/av/media/module/mpeg2ts",
+// QTI_BEGIN: 2018-02-19: Audio: frameworks/av: enable audio extended features
+        "frameworks/av/media/libavextensions",
+    ],
+// QTI_END: 2018-02-19: Audio: frameworks/av: enable audio extended features
+    local_include_dirs: [
+        "include/webm",
+    ],
+
+    export_include_dirs: ["include"],
+
+    static_libs: [
+        "libstagefright_mpeg2support_nocrypto",
+    ],
+
+    shared_libs: [
+        "framework-permission-aidl-cpp",
+        "libaudiofoundation",
+        "libdatasource",
+        "liblog",
+        "libstagefright_foundation",
+        "libutils",
+// QTI_BEGIN: 2018-02-19: Audio: frameworks/av: enable audio extended features
+        "libhidlbase",
+        "libui",
+        "libgui",
+        "libmediadrm",
+        "libnativewindow",
+        "libcrypto",
+        "android.hardware.media.omx@1.0",
+        "libhidlmemory",
+// QTI_END: 2018-02-19: Audio: frameworks/av: enable audio extended features
+        "libcamera_client",
+    ],
+
+    header_libs: [
+        "av-headers",
+        "libmedia_headers",
+    ],
+}
+
+cc_library_headers {
+    name: "libstagefright_webm_headers",
+    export_include_dirs: ["include"],
+
+    host_supported: true,
+    target: {
+        darwin: {
+            enabled: false,
+        },
+    },
+}

@@ -1,0 +1,73 @@
+# Flags for the native audioserver
+#
+# Please add flags in alphabetical order.
+
+package: "com.android.media.audioserver"
+container: "system"
+
+# go/keep-sorted start block=yes newline_separated=yes by_regex=name:\s*"([^"]+)"
+flag {
+    name: "cap_engine_preferred_device_improvement"
+    namespace: "media_audio"
+    description:
+        "Enables improvements in the CAP engine for preferred audio input and output "
+        "device selection, including sound settings control and Bluetooth A2DP/SCO "
+        "switching behavior."
+    bug: "436398891"
+}
+
+flag {
+    name: "capture_offloaded_audio"
+    namespace: "media_audio"
+    description: "Supports capturing audio which are playing in PCM offload or MMAP."
+    bug: "460856210"
+}
+
+flag {
+    name: "effect_chain_callback_improve"
+    namespace: "media_audio"
+    description: "Improve effect chain callback mutex logic."
+    bug: "342413767"
+}
+
+flag {
+    name: "enable_strict_port_routing_checks"
+    namespace: "media_audio"
+    description: "Enables strict routing checks on associating ports"
+    bug: "367117623"
+}
+
+flag {
+    name: "fix_input_sharing_logic"
+    namespace: "media_audio"
+    description:
+        "Fix the audio policy logic that decides to reuse or close "
+        "input streams when resources are exhausted"
+    bug: "338446410"
+}
+
+flag {
+    name: "mmap_freezer_awareness"
+    namespace: "media_audio"
+    description: "MMAP freezer awareness"
+    bug: "477685932"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "optimize_call_routing"
+    namespace: "media_audio"
+    description:
+        "Optimize call route update sequence"
+    bug: "382818781"
+}
+
+flag {
+    name: "remove_stream_suspend"
+    namespace: "media_audio"
+    description: "Remove the output stream suspend state and control mechanism"
+    bug: "409706525"
+}
+# go/keep-sorted end
